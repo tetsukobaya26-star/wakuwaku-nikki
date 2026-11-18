@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>わくわく にっき</title>
+<meta name="theme-color" content="#47b8f5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="にっき">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+/* VOICE  こども向け、にぎやかで元気。ことばはひらがな中心
+   IDEA   シールとマスキングテープでかざった「えにっき帳」
+   PICTURE 上の空と丘のけしき（えらんだ天気で変わる）＋スタンプを貼るわく
+   COLOUR 空色の地、白いノート、ピンク・ひまわり黄・ミント・むらさきを道具ごとに
+   TYPE   Mochiy Pop One（見出し）＋ Zen Maru Gothic（本文）
+   LAYOUT iPad横＝ノート左・道具箱右／たて・スマホ＝けしき、ノート、道具の順 */
+:root{color-scheme:light dark;
+--bg:light-dark(#47b8f5,#162356);--bg2:light-dark(#8fdcff,#2a2f78);
+--paper:light-dark(#ffffff,#1e2c62);--ink:light-dark(#2a2340,#f3f0ff);--muted:light-dark(#6a6185,#bdb6dd);
+--line:light-dark(#c9e7fb,#33468a);--soft:light-dark(#f2f8ff,#283a78);
+--pink:#ff5fa2;--sun:#ffc928;--mint:#2fcf98;--purple:#9b7bff;--red:#ff4d4d;--blue:#2f8be0;
+--hill1:light-dark(#5fd068,#2f6b55);--hill2:light-dark(#8fe28a,#24504a);--sunc:light-dark(#ffd23f,#fff3b0)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{background:var(--bg)}
+body{margin:0;color:var(--ink);font:17px/1.6 "Zen Maru Gothic","Hiragino Maru Gothic ProN",system-ui,sans-serif;overflow-x:clip;-webkit-tap-highlight-color:transparent;
+background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cg fill='%23fff' opacity='.28'%3E%3Cpath d='M20 8l3 7 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z'/%3E%3Ccircle cx='85' cy='30' r='4'/%3E%3Ccircle cx='60' cy='95' r='3'/%3E%3Cpath d='M98 78c-4-6-12-2-9 4l9 8 9-8c3-6-5-10-9-4z'/%3E%3C/g%3E%3C/svg%3E"),linear-gradient(var(--bg),var(--bg2) 70%);background-attachment:scroll}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;touch-action:manipulation}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px max(3vw,16px) 0;color:#fff;max-width:1240px;margin:0 auto}
+header h1{margin:0;font:400 clamp(28px,4.4vw,42px)/1.05 "Mochiy Pop One",sans-serif;flex:1;letter-spacing:.02em;text-shadow:0 3px 0 var(--pink),0 6px 0 rgba(0,0,0,.12)}
+.chip{font-size:14px;font-weight:700;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.9);color:#2a2340;white-space:nowrap}
+.chip.cloud{background:#e6fff4;color:#0d6b4a}.chip.local{background:#fff4d6;color:#7a4b00}
+.tabs{display:flex;gap:6px;background:rgba(255,255,255,.25);padding:5px;border-radius:999px}
+.tabs button{min-height:46px;padding:0 20px;border-radius:999px;font-weight:900;color:#fff}
+.tabs button[aria-pressed=true]{background:#fff;color:var(--pink);box-shadow:0 3px 0 rgba(0,0,0,.12)}
+.scene{display:block;width:100%;height:110px;margin-top:-6px}
+.scene .ray{transform-origin:900px 52px;animation:spin 18s linear infinite}
+.scene .drop{animation:fall 1s linear infinite}
+.scene .flake{animation:fall 3s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fall{from{transform:translateY(-30px)}to{transform:translateY(90px)}}
+main{padding:0 max(3vw,16px) 36px;max-width:1240px;margin:0 auto}
+.write{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:18px;align-items:start}
+@media(max-width:860px){.write{grid-template-columns:minmax(0,1fr)}}
+.note{position:relative;background:var(--paper);border-radius:24px;padding:20px;box-shadow:0 7px 0 rgba(0,0,0,.13)}
+.note.book::before,.note.book::after{content:"";position:absolute;top:-12px;width:110px;height:28px;border-radius:4px;opacity:.92;
+background:repeating-linear-gradient(45deg,var(--pink) 0 10px,#ffa3c8 10px 20px)}
+.note.book::before{left:22px;transform:rotate(-5deg)}
+.note.book::after{right:22px;transform:rotate(4deg);background:repeating-linear-gradient(45deg,var(--sun) 0 10px,#ffe58a 10px 20px)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.lbl{font:400 15px "Mochiy Pop One",sans-serif;color:#fff;background:var(--purple);border-radius:999px;padding:3px 12px}
+.lbl.k{background:var(--pink)}
+input[type=date],input[type=text]{font:inherit;font-size:17px;min-height:46px;border:3px solid var(--line);border-radius:14px;padding:4px 12px;background:var(--paper);color:var(--ink)}
+.pick{display:flex;gap:5px;flex-wrap:wrap}
+.pick button{width:48px;height:48px;border-radius:16px;font-size:27px;line-height:1;background:var(--soft);transition:transform .15s}
+.pick button[aria-pressed=true]{background:var(--sun);transform:scale(1.12) rotate(-6deg);box-shadow:0 3px 0 #e59a00}
+.title{width:100%;font-weight:900;font-size:21px!important;margin-top:14px}
+.box{position:relative;margin-top:14px;height:clamp(210px,30vw,290px);border:4px dashed var(--pink);border-radius:20px;overflow:hidden;touch-action:none;
+background:radial-gradient(circle at 20% 30%,color-mix(in srgb,var(--sun) 25%,transparent) 0 60px,transparent 61px),radial-gradient(circle at 85% 75%,color-mix(in srgb,var(--mint) 22%,transparent) 0 70px,transparent 71px),var(--soft)}
+.box .hint{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:var(--muted);font-size:16px;font-weight:700;pointer-events:none;padding:10px}
+.st{position:absolute;width:80px;height:80px;transform:translate(-50%,-50%);touch-action:none;filter:drop-shadow(0 3px 0 rgba(0,0,0,.15))}
+.st svg{width:100%;height:100%;pointer-events:none}
+.st.pop{animation:stp .35s ease-out}
+@keyframes stp{from{transform:translate(-50%,-50%) scale(.2)}70%{transform:translate(-50%,-50%) scale(1.15)}}
+.box.erase .st{animation:wig .4s infinite alternate}
+@keyframes wig{to{transform:translate(-50%,-50%) rotate(7deg)}}
+textarea{display:block;width:100%;margin-top:14px;min-height:270px;resize:vertical;border:0;border-radius:14px;padding:6px 12px 6px 34px;font:inherit;font-size:22px;line-height:44px;color:var(--ink);
+background:linear-gradient(90deg,transparent 22px,color-mix(in srgb,var(--pink) 45%,transparent) 22px 24px,transparent 24px),var(--paper) repeating-linear-gradient(to bottom,transparent 0 43px,var(--line) 43px 44px);background-attachment:local}
+.foot{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.count{color:var(--muted);font-size:15px;font-weight:700;flex:1;white-space:nowrap}
+.big{min-height:54px;padding:0 26px;border-radius:999px;font:400 19px "Mochiy Pop One",sans-serif;color:#fff;background:linear-gradient(var(--pink),#f0408a);box-shadow:0 5px 0 #c42a6c}
+.big:active{transform:translateY(4px);box-shadow:0 1px 0 #c42a6c}
+.ghost{min-height:46px;padding:0 16px;border-radius:999px;font-weight:900;background:var(--soft);color:var(--ink);box-shadow:0 3px 0 var(--line)}
+.ghost:active{transform:translateY(2px);box-shadow:none}
+.ghost[aria-pressed=true]{background:var(--red);color:#fff;box-shadow:0 3px 0 #b83030}
+.tools{display:grid;gap:18px}
+.tools h2{margin:-20px -20px 14px;padding:10px 20px;border-radius:24px 24px 0 0;font:400 19px "Mochiy Pop One",sans-serif;color:#fff}
+.h-emo{background:linear-gradient(90deg,var(--sun),#ffa53a)}
+.h-st{background:linear-gradient(90deg,var(--mint),#26b4c9)}
+.cats{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.cats button{min-height:40px;padding:0 13px;border-radius:999px;font-size:15px;font-weight:900;background:var(--soft)}
+.cats button[aria-pressed=true]{color:#fff;background:var(--c)}
+.emo{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:6px}
+.emo button{height:54px;border-radius:16px;font-size:31px;background:var(--soft)}
+.emo button:active{transform:scale(.85)}
+.stamps{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px}
+.stamps button{aspect-ratio:1;border-radius:18px;background:var(--soft);padding:7px}
+.stamps button[aria-pressed=true]{background:var(--sun);transform:scale(1.05);box-shadow:0 4px 0 #e59a00}
+.stamps svg{width:100%;height:100%}
+.tip{font-size:14px;color:var(--muted);margin:8px 0 0;font-weight:700}
+.idea{margin-top:12px;padding:12px 16px;border-radius:16px;background:light-dark(#fff3c4,#4a3f1c);font-weight:900;display:none}
+.idea.on{display:block}
+.listbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.listbar strong{flex:1;color:#fff;font:400 clamp(20px,3vw,26px) "Mochiy Pop One",sans-serif;text-shadow:0 2px 0 rgba(0,0,0,.15)}
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.card{background:var(--paper);border-radius:20px;padding:16px;box-shadow:0 6px 0 rgba(0,0,0,.13);border-top:10px solid var(--c)}
+.card .d{font-size:14px;color:var(--muted);font-weight:700}
+.card h3{margin:2px 0 6px;font-size:19px;line-height:1.3}
+.card p{margin:0;font-size:15px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.card .mini{display:flex;gap:2px;margin-top:8px;min-height:36px}
+.card .mini svg{width:36px;height:36px}
+.empty{background:var(--paper);border-radius:24px;padding:40px 20px;text-align:center;font-size:18px;font-weight:700}
+.backup{margin-top:20px}
+.backup h2{margin:0 0 6px;font:400 19px "Mochiy Pop One",sans-serif}
+.backup p{margin:0 0 12px;font-size:15px;color:var(--muted)}
+details summary{cursor:pointer;font-weight:900;min-height:44px;display:flex;align-items:center}
+.cid{width:100%;margin:6px 0 8px}
+.modal{position:fixed;inset:0;background:rgba(20,10,40,.45);display:none;place-items:center;padding:16px;z-index:9}
+.modal.on{display:grid}
+.modal>div{background:var(--paper);border-radius:24px;padding:24px;max-width:380px;width:100%;text-align:center}
+.modal p{font-size:19px;font-weight:900;margin:0 0 18px}
+.yay{position:fixed;left:50%;top:40%;width:200px;height:200px;margin:-100px 0 0 -100px;pointer-events:none;opacity:0;z-index:10}
+.yay.go{animation:pop 1.4s ease-out}
+@keyframes pop{0%{opacity:0;transform:scale(.3) rotate(-40deg)}25%{opacity:1;transform:scale(1.15) rotate(0)}70%{opacity:1;transform:scale(1)}100%{opacity:0}}
+.cf{position:fixed;left:50%;top:40%;width:12px;height:16px;border-radius:3px;z-index:10;pointer-events:none;animation:cf 1.3s ease-out forwards}
+@keyframes cf{to{transform:translate(var(--dx),var(--dy)) rotate(var(--r));opacity:0}}
+@media(prefers-reduced-motion:reduce){.yay.go{animation:none;opacity:1}.scene .ray,.scene .drop,.scene .flake,.st.pop{animation:none}.box.erase .st{animation:none;outline:3px dashed var(--red)}}
+.hide{display:none!important}
+@media(max-width:600px){.pick button{width:42px;height:42px;font-size:23px}textarea{font-size:20px}.scene{height:80px}.chip{order:3}}
+</style>
+</head>
+<body>
+<header>
+  <h1>わくわく にっき</h1>
+  <span class="chip" id="chip">📱 このiPadに ほぞん</span>
+  <nav class="tabs"><button id="tW" aria-pressed="true">✏️ かく</button><button id="tR" aria-pressed="false">📖 よむ</button></nav>
+</header>
+<svg class="scene" id="scene" viewBox="0 0 1200 140" preserveAspectRatio="xMidYMax slice" aria-hidden="true"></svg>
+<main>
+<section id="vW" class="write">
+  <div class="note book">
+    <div class="row">
+      <input type="date" id="fDate" aria-label="ひづけ">
+      <span class="lbl">天気</span><div class="pick" id="pW"></div>
+    </div>
+    <div class="row" style="margin-top:10px"><span class="lbl k">きもち</span><div class="pick" id="pM"></div></div>
+    <input type="text" id="fTitle" class="title" placeholder="だいめい（れい：はじめての さかあがり）" maxlength="40">
+    <div class="box" id="box"><div class="hint" id="bHint">みぎの スタンプを えらんで、<br>ここを タッチすると はれるよ</div></div>
+    <textarea id="fBody" placeholder="きょう あったことを かいてみよう！"></textarea>
+    <div class="idea" id="idea"></div>
+    <div class="foot">
+      <span class="count" id="cnt">0もじ</span>
+      <button class="ghost" id="bIdea">💡 なにを かこう？</button>
+      <button class="ghost" id="bNew">🆕 あたらしく</button>
+      <button class="big" id="bSave">ほぞんする</button>
+    </div>
+  </div>
+  <div class="tools">
+    <div class="note">
+      <h2 class="h-emo">えもじ</h2>
+      <div class="cats" id="cats"></div>
+      <div class="emo" id="emo"></div>
+      <p class="tip">タッチすると、文の なかに 入るよ</p>
+    </div>
+    <div class="note">
+      <h2 class="h-st">スタンプ</h2>
+      <div class="stamps" id="stamps"></div>
+      <div class="foot"><button class="ghost" id="bErase" aria-pressed="false">🧽 けす モード</button><span class="tip" id="sTip">うごかしたい ときは、ゆびで ひっぱってね</span></div>
+    </div>
+  </div>
+</section>
+<section id="vR" class="hide">
+  <div class="listbar"><strong id="lCount"></strong></div>
+  <div class="list" id="list"></div>
+  <div class="note backup">
+    <h2>☁️ Googleドライブ（おうちの人へ）</h2>
+    <p>ログインすると、ほぞんするたびに Googleドライブの「わくわくにっき.json」に 自動で 同期します。べつの iPad や Mac で ひらいても、同じ 日記が 見られます。</p>
+    <div class="row">
+      <button class="ghost" id="bLogin">🔑 Googleで ログイン</button>
+      <button class="ghost" id="bSync">🔄 いますぐ 同期</button>
+      <button class="ghost" id="bLogout">ログアウト</button>
+    </div>
+    <p class="tip" id="gdMsg"></p>
+    <details id="cfg"><summary>⚙️ せってい（GoogleのクライアントID）</summary>
+      <input type="text" id="fCid" class="cid" placeholder="123456-xxxx.apps.googleusercontent.com" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <button class="ghost" id="bCid">せっていを ほぞん</button>
+    </details>
+    <h2 style="margin-top:20px">💾 ファイルに のこす</h2>
+    <p>日記を ファイルにして、iPadの「ファイル」や iCloud Drive に のこせます。</p>
+    <div class="row">
+      <button class="ghost" id="bDl">📥 ファイルに ほぞん</button>
+      <button class="ghost" id="bUp">📤 ファイルから もどす</button>
+      <button class="ghost" id="bCopy">📋 ぜんぶ コピー</button>
+      <input type="file" id="fFile" accept=".json,application/json" class="hide">
+    </div>
+  </div>
+</section>
+</main>
+<div class="modal" id="modal"><div><p id="mText"></p><div class="row" style="justify-content:center"><button class="ghost" id="mNo">やめる</button><button class="big" id="mYes">はい</button></div></div></div>
+<div class="yay" id="yay"></div>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+{
+const $=id=>document.getElementById(id);
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+const WEATHER=['☀️','⛅','☁️','☔','⛄','🌈'];
+const SKY={'☀️':'sun','⛅':'sun cloud','☁️':'cloud','☔':'cloud rain','⛄':'cloud snow','🌈':'sun rainbow'};
+const MOOD=['😆','😊','😐','😢','😡','😴','🤩'];
+const EMO={
+ 'きもち':'😀 😆 😂 🥰 😍 😋 😎 🤩 🥳 😮 🤔 😴 😢 😭 😡 😱 😳 🙏 👍 ✌️ 👏 💪 ❤️ 💖'.split(' '),
+ 'どうぶつ':'🐶 🐱 🐰 🐹 🐻 🐼 🐨 🐯 🦁 🐸 🐵 🐧 🐥 🦄 🐢 🐠 🐬 🦋 🐞 🦖'.split(' '),
+ 'たべもの':'🍙 🍛 🍜 🍣 🍕 🍔 🍟 🍳 🍞 🍓 🍎 🍉 🍌 🍇 🍰 🍦 🍩 🍪 🍫 🧃'.split(' '),
+ 'あそび':'⚽ ⚾ 🏀 🎾 🏊 🚲 🛝 🎮 🧩 🎨 🎹 🎤 📚 🎬 🎪 🎡 🎢 🪁 🎈 🎁'.split(' '),
+ 'しぜん':'☀️ 🌤️ ☁️ ☔ ⛄ ❄️ 🌈 ⭐ 🌙 🌸 🌻 🌷 🍀 🍁 🌲 🌊 🔥 ⛰️ 🐚 🌏'.split(' '),
+ 'がっこう':'✏️ 📝 🎒 🏫 📏 🖍️ 📐 🔔 🏆 🥇 🎉 💯 🚌 🚃 🏠 👨‍👩‍👧 👫 🧑‍🏫 ⏰ 📅'.split(' ')
+};
+const CATC=['#ff5fa2','#ff8a3a','#e0a800','#9b7bff','#2fcf98','#2f8be0'];
+const CARDC=['#ff5fa2','#ffc928','#2fcf98','#9b7bff','#47b8f5','#ff8a3a'];
+const IDEAS=['きょう いちばん わらったのは どんなとき？','きゅうしょくで おいしかったものは なに？','やすみじかんに なにを してあそんだ？','はじめて できたことは ある？','だれかに「ありがとう」って いった？いわれた？','きょう みつけた ふしぎなものは？','あしたは なにを したい？','いま いちばん はまっていることは？','きょうの そらは どんな いろだった？','おうちの ひとと どんな はなしを した？'];
+const F='font-family="Zen Maru Gothic,sans-serif" font-weight="900" text-anchor="middle"';
+
+// オリジナルのスタンプ（このアプリのために描いたSVG）
+const S={
+ hana:`<svg viewBox="0 0 100 100">${[...Array(10)].map((_,i)=>`<ellipse cx="50" cy="14" rx="11" ry="14" fill="#fff" stroke="#e8453c" stroke-width="4" transform="rotate(${i*36} 50 50)"/>`).join('')}<circle cx="50" cy="50" r="30" fill="#fff" stroke="#e8453c" stroke-width="4"/><circle cx="50" cy="50" r="21" fill="none" stroke="#e8453c" stroke-width="4"/><circle cx="50" cy="50" r="12" fill="none" stroke="#e8453c" stroke-width="4"/><circle cx="50" cy="50" r="4" fill="#e8453c"/></svg>`,
+ yoku:`<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="#fff" stroke="#e8453c" stroke-width="5"/><circle cx="50" cy="50" r="37" fill="none" stroke="#e8453c" stroke-width="2"/><text x="50" y="44" font-size="17" fill="#e8453c" ${F}>よく</text><text x="50" y="66" font-size="15" fill="#e8453c" ${F}>できました</text></svg>`,
+ gan:`<svg viewBox="0 0 100 100"><path d="M30 55 20 96l14-8 8 12 8-42z" fill="#2f7fd1"/><path d="M70 55l10 41-14-8-8 12-8-42z" fill="#2f7fd1"/><circle cx="50" cy="42" r="34" fill="#ffc928" stroke="#e59a00" stroke-width="4"/><text x="50" y="49" font-size="15" fill="#7a4b00" ${F}>がんばった</text></svg>`,
+ sugoi:`<svg viewBox="0 0 100 100"><path d="M50 8l9 14 16-6-1 17 16 5-11 13 11 13-16 5 1 17-16-6-9 14-9-14-16 6 1-17-16-5 11-13L10 38l16-5-1-17 16 6z" fill="#ff5fa2" stroke="#d63a7e" stroke-width="3" stroke-linejoin="round"/><text x="50" y="58" font-size="22" fill="#fff" ${F}>すごい</text></svg>`,
+ star:`<svg viewBox="0 0 100 100"><path d="M50 6l13 28 30 3-23 20 7 30-27-16-27 16 7-30L7 37l30-3z" fill="#ffd84a" stroke="#f0a400" stroke-width="4" stroke-linejoin="round"/><circle cx="41" cy="50" r="4" fill="#4a3200"/><circle cx="59" cy="50" r="4" fill="#4a3200"/><path d="M43 60q7 6 14 0" stroke="#4a3200" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="34" cy="58" r="4" fill="#ff9a9a"/><circle cx="66" cy="58" r="4" fill="#ff9a9a"/></svg>`,
+ heart:`<svg viewBox="0 0 100 100"><path d="M50 88S10 62 10 36c0-14 10-24 22-24 9 0 15 5 18 12 3-7 9-12 18-12 12 0 22 10 22 24 0 26-40 52-40 52z" fill="#ff6f9c" stroke="#e23f74" stroke-width="4"/><ellipse cx="32" cy="32" rx="7" ry="5" fill="#fff" opacity=".7"/></svg>`,
+ neko:`<svg viewBox="0 0 100 100"><path d="M16 40 20 8l24 18zM84 40 80 8 56 26z" fill="#ffae5c" stroke="#d9772a" stroke-width="3" stroke-linejoin="round"/><circle cx="50" cy="56" r="36" fill="#ffae5c" stroke="#d9772a" stroke-width="3"/><circle cx="37" cy="52" r="5" fill="#3a2410"/><circle cx="63" cy="52" r="5" fill="#3a2410"/><path d="M46 63l4 3 4-3" fill="#ff7b8a"/><path d="M42 70q8 6 16 0" stroke="#3a2410" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M14 60h18M14 68l18-3M86 60H68M86 68l-18-3" stroke="#3a2410" stroke-width="2"/></svg>`,
+ oni:`<svg viewBox="0 0 100 100"><path d="M50 10C38 10 10 62 12 76c2 12 14 14 38 14s36-2 38-14C90 62 62 10 50 10z" fill="#fff" stroke="#b8c2cc" stroke-width="4"/><rect x="34" y="62" width="32" height="28" rx="3" fill="#1f3326"/><circle cx="40" cy="48" r="3.5" fill="#333"/><circle cx="60" cy="48" r="3.5" fill="#333"/><path d="M45 55q5 4 10 0" stroke="#333" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`,
+ niji:`<svg viewBox="0 0 100 100">${['#ff5a5a','#ffa53a','#ffd84a','#5fd068','#4aa8ff','#8b6bff'].map((c,i)=>`<path d="M${8+i*6} 74a${42-i*6} ${42-i*6} 0 0 1 ${84-i*12} 0" stroke="${c}" stroke-width="6" fill="none"/>`).join('')}<ellipse cx="16" cy="76" rx="15" ry="9" fill="#fff" stroke="#cfd8e0" stroke-width="2"/><ellipse cx="84" cy="76" rx="15" ry="9" fill="#fff" stroke="#cfd8e0" stroke-width="2"/></svg>`,
+ flower:`<svg viewBox="0 0 100 100"><path d="M50 60v36" stroke="#3fa34d" stroke-width="5"/><path d="M50 82q-18-2-20-14 14 0 20 14z" fill="#5fd068"/>${[...Array(5)].map((_,i)=>`<circle cx="50" cy="22" r="14" fill="#ff8fb8" transform="rotate(${i*72} 50 40)"/>`).join('')}<circle cx="50" cy="40" r="11" fill="#ffd84a"/></svg>`,
+ rocket:`<svg viewBox="0 0 100 100"><path d="M50 6c16 12 22 34 16 58H34C28 40 34 18 50 6z" fill="#fff" stroke="#9aa6b8" stroke-width="3"/><circle cx="50" cy="34" r="9" fill="#47b8f5" stroke="#2f7fd1" stroke-width="3"/><path d="M34 50 20 70l16-2zM66 50l14 20-16-2z" fill="#ff4d4d"/><path d="M40 66q10 30 20 0z" fill="#ffc928"/><path d="M45 66q5 16 10 0z" fill="#ff8a3a"/></svg>`
+};
+const SK=Object.keys(S);
+
+// けしき
+{const sc=$('scene');let r=7;const rnd=()=>(r=r*16807%2147483647)/2147483647;
+ const cloud=(x,y,s)=>`<g transform="translate(${x} ${y}) scale(${s})" fill="#fff"><ellipse cx="0" cy="10" rx="46" ry="16"/><ellipse cx="-18" cy="0" rx="22" ry="18"/><ellipse cx="14" cy="-4" rx="26" ry="22"/></g>`;
+ sc.innerHTML=`<g data-k="rainbow">${['#ff5a5a','#ffa53a','#ffd84a','#5fd068','#4aa8ff','#8b6bff'].map((c,i)=>`<path d="M${150+i*12} 140a${150-i*12} ${150-i*12} 0 0 1 ${300-i*24} 0" stroke="${c}" stroke-width="12" fill="none" opacity=".9"/>`).join('')}</g>
+ <g data-k="sun"><g class="ray">${[...Array(12)].map((_,i)=>`<rect x="896" y="6" width="8" height="18" rx="4" fill="var(--sunc)" transform="rotate(${i*30} 900 52)"/>`).join('')}</g><circle cx="900" cy="52" r="28" fill="var(--sunc)"/></g>
+ <g data-k="cloud">${cloud(620,40,1)}${cloud(1080,58,.8)}${cloud(330,30,.7)}</g>
+ <g data-k="rain" fill="#bfe8ff">${[...Array(40)].map(()=>`<rect class="drop" style="animation-delay:-${(rnd()).toFixed(2)}s" x="${(rnd()*1200)|0}" y="${(rnd()*40)|0}" width="3" height="14" rx="2"/>`).join('')}</g>
+ <g data-k="snow" fill="#fff">${[...Array(40)].map(()=>`<circle class="flake" style="animation-delay:-${(rnd()*3).toFixed(2)}s" cx="${(rnd()*1200)|0}" cy="${(rnd()*40)|0}" r="${(2+rnd()*3).toFixed(1)}"/>`).join('')}</g>
+ <path d="M0 112C180 70 360 80 520 104S860 60 1200 96V140H0z" fill="var(--hill2)"/>
+ <path d="M0 128C220 100 420 110 640 126S980 100 1200 120V140H0z" fill="var(--hill1)"/>
+ ${[...Array(26)].map(()=>{const x=(rnd()*1200)|0,c=CARDC[(rnd()*6)|0];return `<g transform="translate(${x} ${128+((rnd()*8)|0)})"><path d="M0 0v-10" stroke="#3fa34d" stroke-width="2"/><circle cy="-12" r="4" fill="${c}"/></g>`}).join('')}`;}
+function sky(w){const on=(SKY[w]||'sun rainbow').split(' ');$('scene').querySelectorAll('[data-k]').forEach(g=>g.style.display=on.includes(g.dataset.k)?'':'none')}
+
+let diaries=store.get('nikki.list',[]).map(d=>({...d,id:String(d.id)}));
+const localStart=diaries.slice();
+let cur=store.get('nikki.draft',null)||blank();
+let selStamp=null,erase=false,cat='きもち',col=null,mode='loading';
+
+function today(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function blank(){return{id:null,date:today(),w:'',m:'',title:'',body:'',st:[]}}
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function jdate(s){const d=new Date(s+'T00:00');return isNaN(d)?s:`${d.getMonth()+1}月${d.getDate()}日（${'日月火水木金土'[d.getDay()]}）`}
+function clean(d){const n=v=>Math.max(0,Math.min(100,+v||50));const s=v=>typeof v==='string'?v:'';
+ return{date:s(d.date).slice(0,10)||today(),w:s(d.w).slice(0,8),m:s(d.m).slice(0,8),title:s(d.title).slice(0,40),body:s(d.body).slice(0,20000),
+  u:+d.u||0,st:(Array.isArray(d.st)?d.st:[]).filter(x=>x&&S[x.k]).slice(0,60).map(x=>({k:x.k,x:n(x.x),y:n(x.y)}))}}
+
+function setMode(m){mode=m;const c=$('chip');c.className='chip '+(m==='cloud'?'cloud':m==='local'?'local':'');
+ c.textContent={loading:'☁️ つないでいます…',cloud:'☁️ クラウドに ほぞん',local:'📱 このiPadだけに ほぞん',slow:'☁️ まだ つながらないよ'}[m]}
+
+function pick(el,arr,key){el.innerHTML=arr.map(e=>`<button aria-pressed="${cur[key]===e}" data-v="${e}">${e}</button>`).join('');
+ el.onclick=ev=>{const b=ev.target.closest('button');if(!b)return;cur[key]=cur[key]===b.dataset.v?'':b.dataset.v;pick(el,arr,key);if(key==='w')sky(cur.w);draft()}}
+function renderForm(){$('fDate').value=cur.date;$('fTitle').value=cur.title;$('fBody').value=cur.body;
+ pick($('pW'),WEATHER,'w');pick($('pM'),MOOD,'m');sky(cur.w);renderBox();count()}
+function renderBox(popLast){const b=$('box');b.querySelectorAll('.st').forEach(n=>n.remove());
+ cur.st.forEach((s,i)=>{const d=document.createElement('div');d.className='st'+(popLast&&i===cur.st.length-1?' pop':'');d.dataset.i=i;d.style.left=s.x+'%';d.style.top=s.y+'%';d.innerHTML=S[s.k]||'';b.appendChild(d)});
+ $('bHint').classList.toggle('hide',cur.st.length>0);b.classList.toggle('erase',erase)}
+function count(){$('cnt').textContent=[...$('fBody').value].length+'もじ'}
+function draft(){store.set('nikki.draft',cur)}
+function cache(){store.set('nikki.list',diaries)}
+
+$('fDate').oninput=e=>{cur.date=e.target.value;draft()};
+$('fTitle').oninput=e=>{cur.title=e.target.value;draft()};
+$('fBody').oninput=e=>{cur.body=e.target.value;count();draft()};
+
+function renderEmo(){$('cats').innerHTML=Object.keys(EMO).map((c,i)=>`<button style="--c:${CATC[i]}" aria-pressed="${c===cat}" data-c="${c}">${c}</button>`).join('');
+ $('emo').innerHTML=EMO[cat].map(e=>`<button data-e="${e}" aria-label="${e}">${e}</button>`).join('')}
+$('cats').onclick=e=>{const b=e.target.closest('button');if(b){cat=b.dataset.c;renderEmo()}};
+const ta=$('fBody');let caret=null;
+ta.addEventListener('blur',()=>{caret=[ta.selectionStart,ta.selectionEnd]});
+$('emo').addEventListener('pointerdown',e=>{if(e.target.closest('button'))e.preventDefault()});
+$('emo').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+ const [s,en]=document.activeElement===ta?[ta.selectionStart,ta.selectionEnd]:(caret||[ta.value.length,ta.value.length]);
+ ta.setRangeText(b.dataset.e,s,en,'end');caret=[ta.selectionStart,ta.selectionEnd];cur.body=ta.value;count();draft()};
+
+function renderStamps(){$('stamps').innerHTML=SK.map(k=>`<button data-k="${k}" aria-pressed="${k===selStamp}" aria-label="スタンプ">${S[k]}</button>`).join('')}
+const tipDef='うごかしたい ときは、ゆびで ひっぱってね';
+$('stamps').onclick=e=>{const b=e.target.closest('button');if(!b)return;selStamp=selStamp===b.dataset.k?null:b.dataset.k;erase=false;$('bErase').setAttribute('aria-pressed','false');renderStamps();renderBox();
+ $('sTip').textContent=selStamp?'わくの なかを タッチして はろう！':tipDef};
+$('bErase').onclick=()=>{erase=!erase;selStamp=null;renderStamps();renderBox();$('bErase').setAttribute('aria-pressed',erase);$('sTip').textContent=erase?'けしたい スタンプを タッチしてね':tipDef};
+const box=$('box');let drag=null;
+const pos=(e,r)=>[Math.max(5,Math.min(95,(e.clientX-r.left)/r.width*100)),Math.max(10,Math.min(90,(e.clientY-r.top)/r.height*100))];
+box.addEventListener('pointerdown',e=>{const r=box.getBoundingClientRect();const st=e.target.closest('.st');
+ if(st){const i=+st.dataset.i;if(erase){cur.st.splice(i,1);renderBox();draft();return}drag={i,el:st};st.setPointerCapture(e.pointerId);return}
+ if(selStamp){const [x,y]=pos(e,r);cur.st.push({k:selStamp,x:+x.toFixed(1),y:+y.toFixed(1)});renderBox(true);draft()}});
+box.addEventListener('pointermove',e=>{if(!drag)return;const [x,y]=pos(e,box.getBoundingClientRect());
+ drag.el.style.left=x+'%';drag.el.style.top=y+'%';cur.st[drag.i].x=+x.toFixed(1);cur.st[drag.i].y=+y.toFixed(1)});
+const endDrag=()=>{if(drag){drag=null;draft()}};
+box.addEventListener('pointerup',endDrag);box.addEventListener('pointercancel',endDrag);
+
+$('bIdea').onclick=()=>{const el=$('idea');el.textContent='💡 '+IDEAS[Math.floor(Math.random()*IDEAS.length)];el.classList.add('on')};
+
+let mCb=null;
+function ask(t,cb,one){$('mText').textContent=t;mCb=cb;$('mNo').classList.toggle('hide',!!one);$('mYes').textContent=one?'OK':'はい';$('modal').classList.add('on')}
+$('mNo').onclick=()=>$('modal').classList.remove('on');
+$('mYes').onclick=()=>{$('modal').classList.remove('on');const f=mCb;mCb=null;f&&f()};
+
+$('bNew').onclick=()=>{const go=()=>{cur=blank();draft();renderForm();$('idea').classList.remove('on')};
+ if(cur.body||cur.title||cur.st.length)ask('いま かいている にっきを けして、あたらしく はじめる？',go);else go()};
+
+let deleted=store.get('nikki.deleted',{});
+function put(d){d.u=Date.now();const i=diaries.findIndex(x=>x.id===d.id);if(i>=0)diaries[i]=d;else diaries.push(d);cache()}
+function del(id){diaries=diaries.filter(x=>x.id!==id);deleted[id]=Date.now();store.set('nikki.deleted',deleted);cache();renderList();syncNow(false)}
+
+function celebrate(){const y=$('yay');y.innerHTML=S.hana;y.classList.remove('go');void y.offsetWidth;y.classList.add('go');
+ if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+ for(let i=0;i<36;i++){const c=document.createElement('span');c.className='cf';const a=Math.random()*Math.PI*2,d=120+Math.random()*220;
+  c.style.background=CARDC[i%6];c.style.setProperty('--dx',Math.cos(a)*d+'px');c.style.setProperty('--dy',Math.sin(a)*d+120+'px');c.style.setProperty('--r',(Math.random()*720-360)+'deg');
+  document.body.appendChild(c);setTimeout(()=>c.remove(),1400)}}
+
+$('bSave').onclick=()=>{if(!cur.body.trim()&&!cur.title.trim()&&!cur.st.length){ask('まだ なにも かいてないよ。すこし かいてみよう！',null,true);return}
+ const d={...clean(cur),id:cur.id||String(Date.now())};put(d);syncNow(false);
+ cur=blank();draft();renderForm();$('idea').classList.remove('on');celebrate()};
+
+function renderList(){const sorted=[...diaries].sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
+ $('lCount').textContent=diaries.length?`これまでに ${diaries.length}こ かいたよ！`:'にっきの ほんだな';
+ $('list').innerHTML=sorted.length?sorted.map((d,i)=>`<div class="card" style="--c:${CARDC[i%6]}"><div class="d">${esc(jdate(d.date))} ${esc(d.w)} ${esc(d.m)}</div><h3>${esc(d.title||'（だいめい なし）')}</h3><p>${esc(d.body)}</p><div class="mini">${(d.st||[]).slice(0,6).map(s=>S[s.k]||'').join('')}</div><div class="foot"><button class="ghost" data-ed="${esc(d.id)}">✏️ なおす</button><button class="ghost" data-del="${esc(d.id)}">🗑️ けす</button></div></div>`).join('')
+ :`<div class="empty">📔<br>まだ にっきが ないよ。<br>「かく」から はじめてみよう！</div>`}
+$('list').onclick=e=>{const ed=e.target.closest('[data-ed]'),dl=e.target.closest('[data-del]');
+ if(ed){const d=diaries.find(x=>x.id===ed.dataset.ed);if(d){cur=JSON.parse(JSON.stringify(d));draft();renderForm();show('W')}}
+ if(dl){const id=dl.dataset.del;ask('この にっきを けしても いい？',()=>del(id))}};
+
+$('bCopy').onclick=async()=>{const txt=[...diaries].sort((a,b)=>a.date.localeCompare(b.date)).map(d=>`■ ${jdate(d.date)} ${d.w}${d.m}\n${d.title}\n${d.body}`).join('\n\n');
+ const b=$('bCopy');try{await navigator.clipboard.writeText(txt);b.textContent='✅ コピーしたよ'}catch(e){b.textContent='コピーできなかった'}setTimeout(()=>b.textContent='📋 ぜんぶ コピー',2000)};
+
+const today2=()=>today();
+$('bDl').onclick=()=>{if(!diaries.length){ask('まだ にっきが ないよ',null,true);return}
+ try{const blob=new Blob([JSON.stringify({app:'wakuwaku-nikki',v:2,saved:new Date().toISOString(),diaries,deleted},null,1)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`nikki-${today2()}.json`;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000)}catch(e){ask('ほぞん できませんでした',null,true)}};
+$('bUp').onclick=()=>$('fFile').click();
+const sid=v=>String(v??'').replace(/[^0-9A-Za-z_-]/g,'').slice(0,40);
+function importJson(j){const arr=Array.isArray(j)?j:j&&j.diaries;if(!Array.isArray(arr))throw 0;
+ const have=new Set(diaries.map(d=>d.id));let n=0;
+ for(const x of arr.slice(0,2000)){const id=sid(x&&x.id)||String(Date.now()+n);if(have.has(id))continue;put({...clean(x||{}),id});have.add(id);n++}
+ renderList();return n}
+$('fFile').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+ try{const n=importJson(JSON.parse(await f.text()));ask(n?`${n}こ の にっきを もどしたよ！`:'あたらしい にっきは なかったよ',null,true);if(n)syncNow(false)}
+ catch(err){ask('この ファイルは よめませんでした',null,true)}};
+
+function show(v){$('vW').classList.toggle('hide',v!=='W');$('vR').classList.toggle('hide',v!=='R');
+ $('tW').setAttribute('aria-pressed',v==='W');$('tR').setAttribute('aria-pressed',v==='R');if(v==='R')renderList();scrollTo(0,0)}
+$('tW').onclick=()=>show('W');$('tR').onclick=()=>show('R');
+
+// ===== Googleドライブ同期 =====
+// おうちの人へ：ここに クライアントID を書いておくと、設定画面で入れなくても使えます
+const CLIENT_ID_DEFAULT='';
+const FNAME='わくわくにっき.json',SCOPE='https://www.googleapis.com/auth/drive.file';
+let cid=store.get('nikki.cid','')||CLIENT_ID_DEFAULT;
+let linked=store.get('nikki.linked',false),fileId=store.get('nikki.fileId',null);
+let token=null,tokenExp=0,tc=null,syncing=false,pend=false;
+const gMsg=t=>{$('gdMsg').textContent=t};
+const tv=()=>token&&Date.now()<tokenExp;
+const hm=()=>{const d=new Date();return `${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`};
+function setMode2(m){mode=m;const c=$('chip');c.className='chip '+(m==='cloud'?'cloud':m==='local'?'local':'');
+ c.textContent={cloud:'☁️ ドライブと どうき',sync:'🔄 どうき中…',idle:'☁️ ほぞんすると どうき',local:'📱 このiPadに ほぞん',relogin:'🔑 ログインが ひつよう'}[m]||''}
+function refreshUi(){$('bLogout').classList.toggle('hide',!linked);$('bSync').classList.toggle('hide',!linked);
+ $('bLogin').textContent=linked?'🔑 ログインしなおす':'🔑 Googleで ログイン';$('fCid').value=cid;
+ if(!cid)gMsg('まず「せってい」に GoogleのクライアントIDを 入れてください。');
+ else if(!linked)gMsg('「Googleで ログイン」を おすと、ドライブとの 同期が はじまります。')}
+function initTc(){if(tc)return true;if(!cid||!(window.google&&google.accounts&&google.accounts.oauth2))return false;
+ tc=google.accounts.oauth2.initTokenClient({client_id:cid,scope:SCOPE,
+  callback:r=>{if(!r||r.error||!r.access_token){gMsg('ログイン できませんでした（'+(r&&r.error||'?')+'）');setMode2(linked?'relogin':'local');return}
+   token=r.access_token;tokenExp=Date.now()+((+r.expires_in||3600)-120)*1000;linked=true;store.set('nikki.linked',true);refreshUi();sync()},
+  error_callback:e=>{gMsg(e&&e.type==='popup_closed'?'ログインの 画面が とじられました。':'ログインの 画面が ひらけませんでした。ポップアップが ブロックされていないか たしかめてね。');setMode2(linked?'relogin':'local')}});
+ return true}
+// ボタンを おした ときに よぶ（ログイン画面は タップの 中でしか ひらけないため）
+function syncNow(interactive){if(!cid){if(interactive){$('cfg').open=true;gMsg('まず クライアントIDを 入れてね。')}return}
+ if(tv()){sync();return}
+ if(!linked&&!interactive)return;
+ if(!initTc()){gMsg('Googleの じゅんび中です。すこし まって もう一度 おしてね。');return}
+ try{tc.requestAccessToken({prompt:linked&&!interactive?'':'consent'})}catch(e){gMsg('ログインの 画面が ひらけませんでした。')}}
+async function api(url,opt){const o=opt||{};const r=await fetch(url,{...o,headers:{...(o.headers||{}),Authorization:'Bearer '+token}});
+ if(r.status===401){token=null;throw{code:401}}if(!r.ok)throw{code:r.status};return r}
+function merge(r){const del={...((r&&r.deleted&&typeof r.deleted==='object')?r.deleted:{})};
+ for(const k in deleted)del[k]=Math.max(+del[k]||0,deleted[k]);
+ const map=new Map();for(const d of [...(Array.isArray(r&&r.diaries)?r.diaries:[]),...diaries]){const id=sid(d&&d.id);if(!id)continue;const x={...clean(d),id};const o=map.get(id);if(!o||x.u>=o.u)map.set(id,x)}
+ diaries=[...map.values()].filter(d=>!((+del[d.id]||0)>=d.u&&del[d.id]));deleted=del;cache();store.set('nikki.deleted',deleted);
+ if(!$('vR').classList.contains('hide'))renderList()}
+async function sync(){if(syncing){pend=true;return}syncing=true;setMode2('sync');gMsg('🔄 ドライブと 同期しています…');
+ try{
+  if(!fileId){const q=encodeURIComponent(`name='${FNAME}' and trashed=false`);
+   const j=await (await api(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=drive&fields=files(id)&orderBy=modifiedTime desc`)).json();
+   fileId=j.files&&j.files[0]?j.files[0].id:null}
+  let remote=null;
+  if(fileId){try{remote=await (await api(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`)).json()}catch(e){if(e.code===404){fileId=null}else throw e}}
+  merge(remote||{});
+  const body=JSON.stringify({app:'wakuwaku-nikki',v:2,saved:new Date().toISOString(),diaries,deleted});
+  if(fileId){await api(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`,{method:'PATCH',headers:{'Content-Type':'application/json'},body})}
+  else{const bd='nikki'+Date.now();const mb=`--${bd}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify({name:FNAME,mimeType:'application/json'})}\r\n--${bd}\r\nContent-Type: application/json\r\n\r\n${body}\r\n--${bd}--`;
+   const j=await (await api('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',{method:'POST',headers:{'Content-Type':'multipart/related; boundary='+bd},body:mb})).json();fileId=j.id}
+  store.set('nikki.fileId',fileId);setMode2('cloud');gMsg(`✅ ${hm()} に ドライブと 同期しました（${diaries.length}こ）`)}
+ catch(e){if(e&&e.code===401){setMode2('relogin');gMsg('ログインが きれました。「ログインしなおす」を おしてね。')}
+  else{setMode2('idle');gMsg('ドライブに つながりませんでした。インターネットを たしかめてね。（iPadの中には ほぞん ずみ）')}}
+ syncing=false;if(pend){pend=false;sync()}}
+$('bLogin').onclick=()=>syncNow(true);
+$('bSync').onclick=()=>syncNow(false);
+$('bLogout').onclick=()=>ask('Googleドライブとの 同期を やめる？（iPadの 日記は のこります）',()=>{
+ try{if(token&&window.google)google.accounts.oauth2.revoke(token,()=>{})}catch(e){}
+ token=null;linked=false;fileId=null;store.set('nikki.linked',false);store.set('nikki.fileId',null);setMode2('local');refreshUi()});
+$('bCid').onclick=()=>{const v=$('fCid').value.trim();if(v&&!/^[0-9A-Za-z._-]+\.apps\.googleusercontent\.com$/.test(v)){gMsg('クライアントIDの 形が ちがうみたい。「〜.apps.googleusercontent.com」で おわる 文字を 入れてね。');return}
+ cid=v;tc=null;store.set('nikki.cid',v);$('cfg').open=false;refreshUi();if(v)gMsg('せっていを ほぞんしました。「Googleで ログイン」を おしてね。')};
+
+renderForm();renderEmo();renderStamps();setMode2(linked?'idle':'local');refreshUi();
+
+}
+</script>
+</body>
+</html>
